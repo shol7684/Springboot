@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baemin.dao.StoreDAO">
+
+	<!-- 매장 목록 -->
+	<select id="getStoreList" parameterType="hashMap" resultType="com.baemin.vo.StoreVO">
+		SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment,
+		    nvl(round(avg(r.score),1),0) score
+		FROM
+		    storelist s
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+	    GROUP BY  s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+	    HAVING 
+			s.cate = ${category } 
+		AND 
+			s.store_address1 
+		LIKE '${address1 }%'
+		
+	</select>
+	
+	
+	<!-- 매장 상세 -->
+	<select id="getStoreDetail" resultType="com.baemin.vo.GoodStoreVO" >
+		<!-- SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment
+		FROM
+		    storelist s
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+	    GROUP BY  s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+    	HAVING 
+			s.store_num = #{storeNum } -->
+	</select>
+	
+	<!-- 메뉴 목록 -->
+	<select id="getMenuList" resultType="com.baemin.vo.MenuVO">
+		select 
+			store_num
+			,store_name
+			,menu_name
+			,menu_price
+			,menu_dec
+			,menu_img
+			,menu_thumb
+			,menu_num
+		FROM 
+			bm_menu_list
+		WHERE 
+			store_num = #{storeNum }
+	</select>
+	
+	
+	<!-- 리뷰 작성 -->
+	<insert id="review" >
+		INSERT INTO BM_REVIEW (
+		    store_num,
+		    user_id,
+		    content,
+		    order_num,
+		    score,
+		    review_img
+		) VALUES (
+		    #{storeNum },
+		    #{userId },
+		    #{content },
+		    #{orderNum },
+		    #{score },
+		    #{reviewImg }
+		)
+		
+			
+	</insert>
+	
+	<!-- 리뷰 작성 완료 -->
+	<update id="reivewComplete" parameterType="hashMap">
+		update
+			bm_order_list
+		set
+			review_count = 0
+		where 
+			user_id = #{userId }
+		and 
+			order_num = #{orderNum }		
+	</update>
+	
+	<!-- 리뷰 목록 -->
+	<select id="reviewList" resultType="com.baemin.vo.ReviewVO">
+	    SELECT 
+	        r.store_num,
+	        r.user_id,
+	        r.content,
+	        r.boss_comment,
+	        r.order_num,
+	        r.regi_date,
+	        r.score,
+	        r.review_img,
+	        nickname
+	    FROM 
+	    	bm_review r 
+	    INNER JOIN 
+	        bm_user u
+        ON
+	        r.user_id = u.user_id
+    	WHERE 
+    		store_num = #{storeNum }
+		ORDER BY
+			r.regi_date 
+		DESC    			
+    		
+	</select>
+	
+	<!-- 매장 검색 -->
+	<select id="searchStoreList"  parameterType="hashMap" resultType="com.baemin.vo.StoreVO">
+		 select 
+			cate,
+		    store_num,
+		    store_name,
+		    store_address1,
+		    store_address2,
+		    store_address3,
+		    store_phone,
+		    store_img,
+		    store_thumb,
+		    busi_hours1,
+		    busi_hours2,
+		    min_delevery,
+		    delevery_time,
+		    score,
+		    delevery_tip,
+		    store_des
+		from 
+			storelist
+		where
+			store_address1
+		like
+			'${address }%'
+		and 
+			store_name 
+		like 
+			'%${storeName }%'
+		
+	
+	</select>
+	
+	<!-- 매장 정렬 -->
+	<select id="sortStoreList"  resultType="com.baemin.vo.StoreVO">
+	SELECT * FROM
+		(SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment,
+		    nvl(round(avg(r.score),1),0) score
+		FROM
+		    storelist s
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+	    GROUP BY  s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+	    HAVING 
+			s.cate =  ${category } 
+		AND 
+			s.store_address1 
+		LIKE
+			'${address1 }%')
+			
+         
+       	<if test="index == 1">
+        ORDER BY
+			  delevery_time     	
+       	</if>
+       	
+       	<if test="index == 2">
+       	ORDER BY
+			  delevery_tip     	
+       	</if>
+       	
+       	<if test="index == 3">
+       	ORDER BY
+			  score desc     	
+       	</if>
+       	
+       	
+		
+	</select>
+	
+	
+	<!-- 리뷰수 조인 실패해서 추가 -->
+<!-- 	<select id="reviewCount" resultType="Map" >
+		SELECT
+			 a.reviewcount,
+			 a.bosscomment,
+			 a.score,
+			 b.ordercount
+		FROM (
+			SELECT 
+				count(content) reviewcount,
+				count(boss_comment) bosscomment,
+				nvl(round(AVG(SCORE),1),0) score
+			FROM bm_review WHERE store_Num = #{storeNum } ) a, (	
+				
+			SELECT 
+				count(order_num) ordercount FROM bm_order_list 
+			WHERE
+				store_Num = #{storeNum }) b			
+	</select> -->
+	
+	<!-- 리뷰 수정하기 이미치 첨부 o -->
+	<update id="modifyReview">
+		UPDATE BM_REVIEW SET 
+		    content = #{content },
+		    score = #{score }
+		    
+	    <if test="reviewImg != null">
+		    ,review_img = #{reviewImg }
+	    </if>
+	    
+		WHERE
+			store_num = #{storeNum }
+		AND
+			order_num = #{orderNum }
+		AND
+			user_id = #{userId }
+	</update>
+	
+	
+	
+	
+</mapper>

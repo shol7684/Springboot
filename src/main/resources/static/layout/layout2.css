@@ -1,0 +1,137 @@
+
+.wrap {
+    width: 1000px;
+    background: chartreuse;
+    /* height: 1000px; */
+    font-size: 24px;
+    color: #fff;
+    text-align: center;
+    margin: 0 auto;
+}
+
+header {
+    height: 100px;
+    background: cadetblue;
+    /* line-height: 100px; */
+    display: flex;
+    justify-content: space-between;
+}
+
+.header_logo {
+    width: 200px;
+    background: darkkhaki;
+    height: 100%;
+}
+
+.menu_tap {
+    /* background: darkorchid; */
+    width: 500px;
+    height: 100%;
+    /* display: flex; */
+
+}
+
+.menu_tap ul {
+    /* background: yellow; */
+    /* width: 100%; */
+    height: 80%;
+    width: 90%;
+    margin-top: 20px;
+    margin-left :50px;
+
+}
+
+.menu_tap  li {
+    background: darkseagreen;
+    float: left;
+    height: 60px;
+    width: 100px;
+    line-height: 60px;
+    border: 1px solid #fff;
+    
+}
+/* .menu_tap li:nth-child(1):hover .menu1_1 {
+    display: block;
+}
+.menu_tap li:nth-child(2):hover .menu2_1 {
+    display: block;
+}
+.menu_tap li:nth-child(3):hover .menu3_1 {
+    display: block;
+}
+.menu_tap li:nth-child(4):hover .menu4_1 {
+    display: block;
+} */
+
+
+.menu_tap  li ul{
+    display: none;
+    z-index: 1;
+    margin: 0px;
+}
+
+
+
+
+
+main {
+    height: 500px;
+    background: chocolate;
+}
+
+main .content1 {
+    background: crimson;
+    height: 250px;
+
+}
+
+.content2 { 
+    display: flex;
+}
+
+
+.content2 div {
+
+    height: 250px;
+    background: cyan;
+}
+
+.content2 div:nth-child(1) {
+    background: darkcyan;
+    width: 33.33%;
+}
+.content2 div:nth-child(2) {
+    background: deepskyblue
+    ;
+    width: 33.33%;
+}
+.content2 div:nth-child(3) {
+    background: firebrick;
+    width: 33.33%;
+}
+
+
+footer {
+    height: 150px;
+    background : gold;
+    display: flex  ;
+}
+
+footer .logo {
+    width: 20%;
+    background: cornflowerblue;
+    height: 100%;
+}
+
+footer .copy {
+    width: 60%;
+    height: 100%;
+    background: cyan;
+
+}
+
+footer .sns {
+    width: 20%;
+    height: 100%;
+    background: darkgray;
+}

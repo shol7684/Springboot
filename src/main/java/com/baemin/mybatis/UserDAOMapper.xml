@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baemin.dao.UserDAO">
+	
+	<!-- 회원가입 -->
+	<insert id="join" parameterType="com.baemin.vo.UserVO">
+		INSERT INTO bm_user (
+	        user_id
+        	,user_pwd
+        	,nickname
+        	,user_phone
+       	) VALUES (
+			#{userId }
+			,#{userPwd }
+			,#{nickname }
+			,#{userPhone }
+		)   
+	</insert>
+	
+	
+	<!-- 로그인 -->
+	<select id="login" resultType="com.baemin.vo.UserVO" >
+		SELECT
+			u.user_id,
+			u.user_pwd,
+			u.nickname,
+			u.user_phone,
+			u.rating,
+			u.kakko_login,
+			u.admin_check,
+			sum(p.point) point
+		FROM 
+			bm_user u
+		LEFT JOIN	
+			 bm_point p
+		ON  
+			u.user_id = p.user_id
+		GROUP BY
+			u.user_id,
+			u.user_pwd,
+			u.nickname,
+			u.user_phone,
+			u.rating,
+			u.kakko_login,
+			u.admin_check				
+		HAVING
+			u.user_id = #{userId }
+			
+	</select>  
+	
+	<!-- 로그인 유지하기 -->
+	<select id="continueLogin" resultType="com.baemin.vo.UserVO" >
+		SELECT
+			u.user_id,
+			u.nickname,
+			u.user_phone,
+			u.rating,
+			u.kakko_login,
+			u.admin_check,
+			sum(p.point) point
+		FROM 
+			bm_user u
+		LEFT JOIN	
+			 bm_point p
+		ON  
+			u.user_id = p.user_id
+		GROUP BY
+			u.user_id,
+			u.user_pwd,
+			u.nickname,
+			u.user_phone,
+			u.rating,
+			u.kakko_login,
+			u.admin_check				
+		HAVING
+			u.user_id = #{userId }
+	</select>
+	
+	<!-- 네이버 연동 되어있는지 확인 -->
+	<!-- <select id="naverLoginCheck" resultType="com.baemin.vo.UserVO">
+		SELECT 
+		    user_id,
+		    user_pwd,
+		    nickname,
+		    user_phone,
+		    rating,
+		    naver_login,
+		    admin_check
+		FROM
+    		bm_user
+    	WHERE
+    		user_id = #{email }
+	</select>
+	
+	네이버 정보로 로그인
+	<select id="naverJoin"  resultType="com.baemin.vo.UserVO">
+		SELECT 
+		    user_id,
+		    user_pwd,
+		    nickname,
+		    user_phone,
+		    rating,
+		    naver_login,
+		   	admin_check
+		FROM
+    		bm_user
+    	WHERE
+    		user_id = #{email }	
+    	AND
+    		naver_login = #{id }	
+		
+	</select>
+	
+	
+	이미 사용중인 이메일 네이버 연동
+	<update id="naverConnection" parameterType="hashMap">
+		UPDATE
+			bm_user
+		SET
+			naver_login = #{id }
+		WHERE
+			user_id = #{email }	
+	
+	</update> -->
+	
+	 
+	<!-- 중복확인 아이디 or 닉네임 -->
+	<select id="overlapCheck" resultType="int" parameterType="map">
+		SELECT 
+			count(*) 
+		FROM 
+			bm_user 
+		WHERE
+		
+		<if test="functinoNum == 0"> 
+			nickname = #{overlapCheck }
+		</if> 
+		
+		<if test="functinoNum == 1"> 
+			user_id = #{overlapCheck }
+		</if> 
+		
+	</select>
+	
+	<!-- 마이페이지 내 정보 -->
+	<select id="userInfo" resultType="com.baemin.vo.UserVO">
+		SELECT
+			user_id,
+			user_phone,
+			nickname
+		FROM 
+			bm_user 
+		WHERE 
+			user_id = #{userId }
+		
+	</select>
+
+	
+	<!-- 찜하기 -->
+	<update id="dibs" parameterType="map" >
+		MERGE INTO 
+			bm_good 
+		USING 
+			dual
+		ON 
+			(USER_ID = #{userId } and store_Num = #{storeNum })
+		WHEN MATCHED THEN
+    
+    	UPDATE SET 
+    		good  = 1 
+		DELETE WHERE
+            user_id = #{userId }
+    	WHEN NOT MATCHED THEN
+    	
+		INSERT  
+			(user_id, store_Num, good ) VALUES (#{userId }, #{storeNum }, 1 )
+	</update>
+	
+	
+	
+	
+	<!-- 찜한 가게들 로그인상태-->
+	<select id="dibsLogin" resultType="com.baemin.vo.StoreVO">
+		SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment,
+		    nvl(round(avg(r.score),1),0) score
+		FROM
+		    storelist s
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+		LEFT JOIN
+            bm_good g
+		ON 
+            g.store_Num = s.store_num
+		GROUP BY  
+            s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des,
+            g.user_id
+		HAVING 
+			g.user_id = #{userId }
+            
+		
+	</select>
+	
+	<!-- 찜한 가게들 비로그인상태-->
+	<select id="dibsNoLogin" resultType="com.baemin.vo.StoreVO">
+		SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment,
+		    nvl(round(avg(r.score),1),0) score
+		FROM
+		    storelist s
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+	    GROUP BY  s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+	    HAVING 
+			s.store_num in(${storeNums })
+	
+	</select>
+	
+	
+
+
+	<!-- 내가 쓴 리뷰 -->
+	<select id="getReviewList" resultType="com.baemin.vo.ReviewVO">
+		SELECT
+		    r.store_num,
+		    r.user_id,
+		    r.content,
+		    r.boss_comment,
+		    r.regi_date,
+		    r.score,
+		    r.review_img,
+		    r.order_num,
+		    s.store_name
+		FROM
+		    bm_review r
+		INNER JOIN
+			storelist s
+		ON
+			r.store_num = s.store_num 			    
+		WHERE 
+			user_id = #{userId }
+		ORDER BY
+			r.regi_date desc	
+	</select>
+
+	<!-- 정보수정 -->
+	<update id="modifyInfo">
+		UPDATE 
+			bm_user
+		SET
+		<if test="functionNum == 0">
+			nickname = #{info }
+		</if>
+		
+		<if test="functionNum == 1">
+			user_pwd = #{info }
+		</if>
+			
+		WHERE
+			user_id = #{userId}	
+	</update>
+
+	<!-- 포인트 확인 -->
+	<select id="getPoint" resultType="com.baemin.vo.PointVO">
+	    SELECT
+		    user_id,
+		    regi_date,
+		    point,
+		    use_info
+		FROM
+		    bm_point
+		WHERE
+			user_id = #{userId }   
+		ORDER BY
+			 regi_date
+		DESC   
+			    
+	</select>
+
+	<!-- 상품권 확인 -->
+	<select id="giftCardCheck" resultType="map">
+		SELECT
+			gift_card_num,
+			point,
+			title
+		FROM
+			bm_gift_card
+		WHERE			
+			gift_card_num = #{giftCardNum }	 
+	</select>
+
+	<!-- 카카오 아이디 체크 -->
+	<select id="kakkoIdCheck" resultType="map">
+		SELECT 
+			user_id "userId",
+			user_phone "userPhone",
+			kakko_login "kakkoLogin"
+		FROM
+			bm_user
+		WHERE
+			user_id = #{userEmail }	
+	</select>
+
+	<!-- 카카오 연동 -->
+	<update id="kakkoConnetion">
+		UPDATE 
+			bm_user
+		SET 
+			kakko_login = '1' 
+		WHERE 
+			user_id = #{userId }
+	</update>
+
+	<!-- 카카오아이디로 회원가입 -->
+	<insert id="kakkoJoin">
+		INSERT INTO bm_user (
+			user_id,
+			user_pwd,
+			nickname,
+			user_phone,
+			kakko_login 
+		) VALUES  (
+			#{userId },
+			#{userPwd },
+			#{nickname },
+			#{userPhone },
+			1
+		)
+	</insert>
+	
+
+	
+</mapper>

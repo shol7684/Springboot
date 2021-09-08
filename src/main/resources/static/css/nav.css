@@ -1,0 +1,64 @@
+/* 하단 메뉴 */
+nav {
+    height: 80px;
+    border-top:1px solid #ccc;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    background: #fff;
+    justify-content: center;
+}
+nav ul {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 10px;
+    width: 80%;
+    max-width : 1200px;
+    margin: 0 auto;
+}
+
+nav ul li {
+
+}
+
+nav ul li img {
+    width: 60px;
+}
+
+nav ul li img:hover {
+    transform: scale(1.15); 
+      transition: 0.1s;
+}
+  
+
+
+@media (max-width:1023px) {
+	nav ul {
+	    width: 100%;
+	}
+}
+@media  (max-width:767px) {
+	nav {
+		height: 50px;
+	}
+
+	nav ul {
+	    justify-content: space-around;
+	}
+	
+	nav ul li img {
+	    width: 45px;
+	}
+	
+	nav ul {
+    display: flex;
+	    padding-top: 2px;
+	}
+}
+
+
+  
+
+
+/* 하단 메뉴 */
+

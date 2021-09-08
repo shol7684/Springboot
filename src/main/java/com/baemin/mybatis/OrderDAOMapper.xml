@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baemin.dao.OrderDAO">
+
+	<!-- 주문하기 -->
+	<insert id="order">
+		insert into bm_order_list (
+		    store_num
+		    ,user_id
+		    ,total
+		    ,pay_method
+		    ,order_num
+		    ,request
+		    ,user_address1
+		    ,user_address2
+		    ,user_address3
+		    ,user_phone
+		    ,use_point
+		) VALUES (
+			#{storeNum }
+			,#{userId }
+			,#{total }
+			,#{payMethod }
+			,#{orderNum }
+			,#{request }
+			,#{userAddress1 }
+			,#{userAddress2 }
+			,#{userAddress3 }
+			,#{userPhone }
+			,#{usePoint }
+		)
+
+	</insert >
+
+	<!-- 주문하기 메뉴  -->
+	<insert id="orderDetail">
+		INSERT INTO bm_order_list_detail (
+	   		order_num,
+		    menu_name,
+		    menu_price,
+		    amount,
+		    store_num,
+		    cart_num
+		) VALUES (
+		    #{orderNum },
+		    #{menuName },
+		    #{menuPrice },
+		    #{amount },
+		    #{storeNum },
+		    #{cartNum }
+		    
+		)
+	</insert>
+	
+	<!-- 주문하기 메뉴 옵션 -->
+	<insert id="orderDetailOption">
+		INSERT INTO bm_order_list_detail_option (
+		    order_num,
+		    menu_name,
+		    menu_option,
+		    menu_option_price,
+		    cart_num
+		) VALUES (
+			#{orderNum },
+			#{menuName },
+			#{menuOption },
+			#{menuOptionPrice },
+			#{cartNum }
+		)
+	
+	</insert>
+	
+	
+<!-- 	<select id="getOrderList" resultType="com.baemin.vo.OrderVO">
+		select
+		    store_num,
+		    user_id,
+		    total,
+		    pay_method,
+		    order_num,
+		    request,
+		    order_date,
+		    user_address1,
+		    user_address2,
+		    user_address3,
+		    user_phone
+		from
+		    bm_order_list
+		where
+			user_id = #{userId }    
+    
+	</select> -->
+	
+	<!-- 주문 목록 -->
+	<select id="getOrderList" resultType="com.baemin.vo.OrderStoreVO">
+	SELECT *
+	FROM ( 
+	    SELECT
+		    o.store_num,
+		    o.user_id,
+		    o.total,
+		    o.pay_method,
+		    o.order_num,
+		    o.request,
+		    o.order_date,
+		    o.user_address1,
+		    o.user_address2,
+		    o.user_address3,
+		    o.user_phone,
+		    o.review_count, 
+		    o.delevery_state,
+		    o.delevery_time,
+		    o.use_point, 
+		    s.cate,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+	    FROM
+	    	bm_order_list o
+		INNER JOIN
+	 	   storelist s
+	    ON 
+	    	o.store_num = s.store_num
+		WHERE 
+			user_id = #{userId }
+		)
+        ORDER BY 
+        	order_date desc	
+			
+	</select>
+	
+	<!-- 주문 상세 불러오기 -->
+	<select id="getOrderDetail" resultType="com.baemin.vo.OrderStoreVO" parameterType="map" >
+    SELECT
+	    o.store_num,
+	    o.user_id,
+	    o.total,
+	    o.pay_method,
+	    o.order_num,
+	    o.request,
+	    o.order_date,
+	    o.user_address1,
+	    o.user_address2,
+	    o.user_address3,
+	    o.user_phone,
+	    o.delevery_state,   
+	    o.use_point,
+	    s.cate,
+	    s.store_name,
+	    s.store_address1,
+	    s.store_address2,
+	    s.store_address3,
+	    s.store_phone,
+	    s.delevery_tip,
+	    d.menu_name,
+	    d.menu_price,
+	    d.amount,
+        d.cart_num
+    FROM
+   		bm_order_list o
+	INNER JOIN
+    	storelist s
+    ON
+    	o.store_num = s.store_num 
+	INNER JOIN 
+    	bm_order_list_detail d
+    ON
+    	o.order_num = d.order_num
+    WHERE
+    	o.order_num = #{orderNum }
+	</select>
+	
+	<!-- 주문 상세 옵션 불러오기 -->
+	<select id="orderMenuOption" resultType="com.baemin.vo.OrderDetailOptionVO" parameterType="map" >
+		SELECT
+		    order_num,
+		    menu_name,
+		    menu_option,
+		    menu_option_price,
+		    cart_num
+		FROM
+		    bm_order_list_detail_option
+		WHERE
+			order_num = #{orderNum }
+	</select>
+	
+	<!-- 주문시 포인트 적립 -->
+	<update id="addPoint" parameterType="map">
+<!-- 		UPDATE 
+			bm_user
+		SET
+			point = #{point }
+		WHERE
+			user_id = #{userId } -->	
+			
+		INSERT INTO bm_point ( 
+		    user_id,
+		    point,
+		    use_info
+		) VALUES (
+			#{userId },
+			#{point },
+			#{storeName }
+		)
+			
+	</update>
+<!-- 	<update id="addPoint">
+		update
+			bm_user 
+		set 
+    		point = (select point from bm_user where user_id = #{userId }) + #{point }
+		where 
+			user_id = #{userId }   			
+			
+	</update> -->
+	
+	
+	
+	
+</mapper>

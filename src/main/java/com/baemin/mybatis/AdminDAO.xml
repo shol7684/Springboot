@@ -1,0 +1,701 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baemin.dao.AdminDAO">
+
+	<select id="getStoreList" resultType="com.baemin.vo.StoreVO">
+		SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment,
+		    nvl(round(avg(r.score),1),0) score
+		FROM
+		    storelist s
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+	    GROUP BY  s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+	</select>
+	
+	<!-- 매장 등록 -->
+	<insert id="resiStore" parameterType="com.baemin.vo.StoreVO">
+		INSERT INTO storeList (
+			cate
+			,store_num
+			,store_name
+			,store_address1
+			,store_address2
+			,store_address3
+			,store_phone
+			,busi_hours1
+			,busi_hours2
+			,min_delevery
+			,delevery_time
+			,delevery_tip
+			,store_des
+			,store_img
+			,store_thumb
+			)
+		VALUES ( 
+			#{cate }
+			,storeList_seq.nextval
+			,#{storeName }
+			,#{storeAddress1 }
+			,#{storeAddress2 }
+			,#{storeAddress3 }
+			,#{storePhone }
+			,#{busiHours1 }
+			,#{busiHours2 }
+			,#{minDelevery }
+			,#{deleveryTime }
+			,#{deleveryTip }
+			,#{storeDes }
+			,#{storeImg }
+			,#{storeThumb }
+			)
+	</insert>
+	
+	<!-- 메뉴 추가 -->
+	<insert id="addMenu" parameterType="com.baemin.vo.MenuVO">
+	    INSERT INTO bm_menu_list (
+			store_num
+			,store_name
+			,menu_num
+	        ,menu_name
+	        ,menu_price
+	        ,menu_dec
+	        ,menu_img
+	        ,menu_thumb
+        ) VALUES (
+    		#{storeNum }
+    		,#{storeName }
+    		,bm_menu_list_seq.nextval
+    		,#{menuName }
+    		,#{menuPrice }
+    		,#{menuDec }
+    		,#{menuImg }
+    		,#{menuThumb }
+   		 )
+	</insert>
+	
+	<!-- 메뉴 옵션 추가 -->
+	<insert id="addMenuOption">
+		INSERT INTO bm_menu_option (
+		    store_num,
+		    menu_num,
+		    option_name,
+		    option_price,
+		    option_num
+		) VALUES (
+		    #{storeNum },
+		    (select menu_num FROM bm_menu_list where menu_name = #{menuName } AND store_num = #{storeNum }),
+		    #{optionName },
+		    #{optionPrice },
+		    bm_menu_option_seq.nextval
+		)
+	
+	</insert>
+	
+	<!-- 메뉴 옵션 불러오기 -->
+	<select id="getMenuOption" resultType="com.baemin.vo.MenuOptionVO">
+		SELECT 
+		    store_num,
+		    menu_num,
+		    option_name,
+		    option_price,
+		    option_num
+		FROM
+			bm_menu_option
+		WHERE
+			menu_num = #{menuNum }
+		ORDER BY
+			option_num 			
+	</select>
+	
+	<!-- 매장 정보 수정 -->
+	<update id="modifyStore" parameterType="com.baemin.vo.StoreVO">
+		UPDATE 
+			storeList 
+		SET
+			cate = #{cate }
+			,store_name = #{storeName }
+			,store_address1 = #{storeAddress1 }
+			,store_address2 = #{storeAddress2 }
+			,store_address3 = #{storeAddress3 }
+			,store_phone = #{storePhone }
+			,busi_hours1 = #{busiHours1 }
+			,busi_hours2 = #{busiHours2 }
+			,min_delevery = #{minDelevery }
+			,delevery_time = #{deleveryTime }
+			,delevery_tip = #{deleveryTip }
+			,store_des = #{storeDes }
+			,store_img = #{storeImg }
+			,store_thumb = #{storeThumb }
+		WHERE
+			store_num = #{storeNum } 
+	</update>
+	
+
+	<!-- 메뉴 상세 -->
+	<select id="menuDetail" resultType="com.baemin.vo.MenuVO" >
+		SELECT 
+			store_num
+			,store_name
+			,menu_name
+			,menu_price
+			,menu_dec
+			,menu_img
+			,menu_thumb
+			,menu_num
+		FROM 
+			bm_menu_list
+		WHERE 
+			store_num = #{storeNum }
+		AND
+			menu_num = #{menuNum }
+	</select>
+	
+	
+	<!-- 관리자 페이지 주문 목록 -->
+	<select id="getOrderList" resultType="com.baemin.vo.OrderStoreVO" >
+	SELECT *
+		FROM ( 
+		    SELECT
+			    o.store_num,
+			    o.user_id,
+			    o.total,
+			    o.pay_method,
+			    o.order_num,
+			    o.request,
+			    o.order_date,
+			    o.user_address1,
+			    o.user_address2,
+			    o.user_address3,
+			    o.user_phone,
+			    o.delevery_state,
+			    o.accept_time,
+			    o.delevery_time,
+			    s.cate,
+			    s.store_name,
+			    s.store_address1,
+			    s.store_address2,
+			    s.store_address3,
+			    s.store_phone,
+			    s.min_delevery,
+			    s.delevery_tip,
+			    s.store_des,
+	            d.menu_name,
+	            d.menu_price,
+	            d.amount,
+	            d.cart_num
+		    FROM
+		    	bm_order_list o
+			inner join
+		 	   storelist s
+		    on 
+		    	o.store_num = s.store_num
+	        inner join
+	            BM_ORDER_LIST_detail d
+	        on    
+	            o.order_num = d.order_num
+			WHERE 
+				o.delevery_state = #{delevery_state }
+			)
+	        order by 
+	        	order_date,
+	        	cart_num  
+            	
+	</select>
+	
+	<!-- 관리자 페이지 주문 목록 옵션 불러오기 -->
+	<select id="getOrderListOption" resultType="com.baemin.vo.OrderDetailOptionVO">
+		SELECT
+		    order_num,
+		    menu_name,
+		    menu_option,
+		    menu_option_price,
+		    cart_num
+		FROM
+		    bm_order_list_detail_option
+		WHERE
+			delevery_state = #{deleveryState }
+	</select>
+	
+	
+	<!-- 주문 수락하기 -->
+	<update id="accept">
+	BEGIN
+		UPDATE
+			bm_order_list
+		SET
+			delevery_state = '처리 중',
+			delevery_time = #{time },
+			accept_time = sysdate			
+		WHERE
+			order_num = #{orderNum };
+			
+			
+		UPDATE
+			bm_order_list_detail
+		SET
+			delevery_state = '처리 중'
+		WHERE
+			order_num = #{orderNum };	
+			
+			
+		UPDATE
+			bm_order_list_detail_option
+		SET
+			delevery_state = '처리 중'
+		WHERE
+			order_num = #{orderNum };	
+	END;		
+			
+	</update>
+	
+	
+	<!-- 주문 거부하기 -->
+	<update id="orderCancle">
+	BEGIN
+        UPDATE
+			bm_order_list
+		SET
+			delevery_state = '주문거부(${cancleReason })'
+		WHERE
+			order_num = #{orderNum };
+			
+			
+		UPDATE
+			bm_order_list_detail
+		SET
+			delevery_state = '주문거부(${cancleReason })'
+		WHERE
+			order_num = #{orderNum };
+			
+			
+		UPDATE
+			bm_order_list_detail_option
+		SET
+			delevery_state = '주문거부(${cancleReason })'
+		WHERE
+			order_num = #{orderNum };
+	END;	
+	</update>
+	
+	
+	<!-- 배달 완료처리하기 -->
+	<update id="complete">
+	BEGIN
+		UPDATE 
+			bm_order_list
+		SET
+			delevery_state = '배달 완료'			
+		WHERE
+			order_num = #{orderNum };
+			
+			
+		UPDATE 
+			bm_order_list_detail
+		SET
+			delevery_state = '배달 완료'			
+		WHERE
+			order_num = #{orderNum };
+			
+			
+		UPDATE 
+			bm_order_list_detail_option
+		SET
+			delevery_state = '배달 완료'			
+		WHERE
+			order_num = #{orderNum };
+	END;		
+			
+	</update>
+	
+	<!-- 매장 상세 -->
+	<select id="getStoreDetail" resultType="com.baemin.vo.GoodStoreVO" parameterType="hashMap">
+		<!-- SELECT
+			s.cate,
+    		s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des, 
+		    count(g.user_id) total_count,
+		    count(case when user_id= #{userId } then 1 end) good_check
+		FROM
+        	storeList s
+    	left join
+        	bm_good g
+    	on
+	        s.store_num = g.store_num
+	    group by 
+		     s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+        having s.store_num = #{storeNum }   -->
+        
+       <!-- 
+       수정 1
+        SELECT distinct
+			s.cate,
+    		s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des, 
+		    count(distinct g.user_id) over() dibs_count,
+		    count(distinct case when g.user_id= #{userId } then 1 end) over() good_check,
+            count(distinct r.review_num) over() review_count,
+            count(distinct r.boss_comment) over() boss_comment_count,
+            nvl(round(AVG(r.score) over(),1 ),0) score,
+            count(distinct o.order_Num) over() order_count
+		FROM
+        	storeList s
+    	LEFT JOIN
+        	bm_good g
+    	ON
+	        s.store_num = g.store_num
+        LEFT JOIN
+            bm_review r
+        ON
+            s.store_num = r.store_Num
+        LEFT JOIN
+            bm_order_list o
+        ON
+            s.store_num = o.store_Num
+        WHERE
+            s.store_num = #{storeNum } -->
+        
+        
+        <!-- 수정 2 -->    
+		SELECT 
+			s.cate,
+    		s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des, 
+            g.dibs_check,
+            g.dibs_count,
+            r.review_count,
+            r.boss_comment_count,
+            r.one_score,
+            r.two_score,
+            r.three_score,
+            r.four_score,
+            r.five_score,
+            r.score,
+            o.order_count
+		FROM
+        	storeList s
+    	LEFT JOIN (
+        	SELECT 
+                count(case when user_id = #{userId } then 1 end) dibs_check,
+                count(*) dibs_count,
+                store_Num  
+			FROM 
+				bm_good where store_num = #{storeNum } group by store_Num ) g
+        ON 
+            g.store_Num = s.store_num    
+        LEFT JOIN (
+            SELECT 
+                count(*) review_count, 
+                count(boss_comment) boss_comment_count,
+                count(case when score = 1 then 1 end) one_score,
+                count(case when score = 2 then 1 end) two_score,
+                count(case when score = 3 then 1 end) three_score,
+                count(case when score = 4 then 1 end) four_score,
+                count(case when score = 5 then 1 end) five_score, 
+                round(avg(score), 1) score, 
+                store_Num  
+			FROM 
+				bm_review where store_num = #{storeNum } group by store_Num ) r
+        ON
+            s.store_num = r.store_num
+		LEFT JOIN (
+            SELECT
+                COUNT(*) order_count,
+                store_num
+           FROM 
+				bm_order_list where store_num = #{storeNum } group by store_num ) o
+        ON
+            s.store_num = o.store_Num
+        WHERE
+            s.store_num = #{storeNum }
+            
+	</select>
+	
+	<!-- 주문 접수 상세보기 -->
+	<select id="getOrderInfo" resultType="com.baemin.vo.OrderInfoVO" >
+		SELECT
+		    o.store_num,
+		    o.user_id,
+		    o.order_num,
+		    o.request,
+		    o.order_date,
+		    o.user_address1,
+		    o.user_address2,
+		    o.user_address3,
+		    o.user_phone,
+		    d.menu_name,
+		    d.menu_price,
+		    d.amount,
+		    d.cart_num
+		FROM
+		    bm_order_list o
+		INNER JOIN
+		    bm_order_list_detail d
+		ON
+			o.order_num = d.order_num
+		WHERE
+			o.order_num = #{orderNum }
+	</select>
+	
+	<!-- 주문 접수 상세보기 옵션-->
+	<select id="getOrderInfoOption" resultType="com.baemin.vo.OrderDetailOptionVO">
+		SELECT
+		    order_num,
+		    menu_name,
+		    menu_option,
+		    menu_option_price,
+		    cart_num
+		FROM
+		    bm_order_list_detail_option
+		WHERE
+			order_num =#{orderNum } 		    
+	
+	</select>
+	
+	
+	<!-- 사장님 댓글 달기 -->
+	<update id="bossComment" parameterType="Map">
+		UPDATE  
+			bm_review
+		SET
+			boss_comment = #{content }
+		WHERE			
+			order_num = #{orderNum }
+	</update>
+	
+	<!-- 메뉴 수정하기 -->
+	<update id="modifyMenu">
+	UPDATE bm_menu_list SET
+	    menu_name = #{menuName },
+	    menu_price = #{menuPrice },
+	    menu_dec = #{menuDec },
+	    menu_img = #{menuImg },
+	    menu_thumb = #{menuThumb }
+	WHERE
+	    store_num = #{storeNum }
+	AND
+	    store_name = #{storeName }
+	AND
+	    menu_num = #{menuNum }
+	</update>
+	
+	<!-- 메뉴 옵션 수정하기 -->
+<!-- 	<update id="updateMenuOption">
+	    UPDATE bm_menu_option SET
+		    option_name = #{optionName },
+		    option_price = #{optionPrice }
+		WHERE
+		    store_num = #{storeNum }
+		AND
+		    menu_num = #{menuNum }
+		AND
+			option_num = #{optionNum }		    
+			    
+	</update> -->
+	
+	<!-- 메뉴 옵션 수정하기 다시 -->
+	<update id="modifyMenuOption" > 
+	MERGE INTO 
+			bm_menu_option
+		USING 
+			dual
+		ON 
+			(store_num  = #{storeNum } AND  option_num = nvl(#{optionNum },0))
+		WHEN MATCHED THEN
+    
+    	UPDATE SET 
+    		option_name  = nvl(#{optionName },0),
+            option_price = nvl(#{optionPrice },0)
+         DELETE WHERE
+         	option_name = '0'   
+	
+    	WHEN NOT MATCHED THEN
+    	
+		INSERT  
+			(store_num,
+		    menu_num,
+		    option_name,
+		    option_price,
+		    option_num ) 
+        VALUES (
+            #{storeNum },
+            #{menuNum },
+            #{optionName },
+            nvl(#{optionPrice },0),
+            bm_menu_option_seq.nextval
+        )
+	
+	
+	</update>
+	
+
+	
+	<!-- 메뉴 삭제 -->
+	<delete id="deleteMenu" parameterType="map">
+		DELETE 
+			bm_menu_list 
+		WHERE 
+			store_Num = ${storeNum } 
+		AND 
+			menu_num = ${menuNum }
+	</delete>
+	
+	<!-- 메뉴 옵션 삭제 -->
+	<delete id="deleteMenuOption">
+		DELETE 
+			bm_menu_option
+		WHERE 
+			store_Num = ${storeNum } 
+		AND 
+			menu_num = ${menuNum }
+	</delete> 
+
+	
+	<!-- 일별 매출 -->
+	<select id="salesStatusDay" resultType="com.baemin.vo.SalesVO">
+		<if test="date == null">
+			SELECT DISTINCT
+			    TO_CHAR(order_date, 'YYYY/MM/DD') order_date,
+			    sum(total) over(PARTITION BY TO_CHAR(order_date, 'YYYY/MM/DD')) day_total,
+			    sum(total) over() total
+			FROM
+			    bm_order_list
+			WHERE
+			    delevery_state = '배달 완료' AND order_date > trunc(sysdate,'MM')
+			ORDER BY 
+				order_date
+		</if>
+		
+		<if test="date != null">
+			SELECT DISTINCT
+			    TO_CHAR(order_date, 'YYYY/MM/DD') order_date,
+			    sum(total) over(PARTITION BY TO_CHAR(order_date, 'YYYY/MM/DD')) day_total,
+			    sum(total) over() total
+			FROM
+			    bm_order_list
+			WHERE
+			    delevery_state = '배달 완료' 
+			AND
+				order_date > trunc(to_date(#{date },'yyyy/mm/dd'),'mm')
+			AND
+				LAST_DAY(to_date(#{date },'yyyy/mm/dd')) > order_date
+			ORDER BY 
+				order_date
+		</if>
+		
+		
+		
+	</select>
+	
+	
+	<!-- 월별 매출 -->
+	<select id="salesStatusMonth" resultType="Map">
+	   select 
+	    sum(case when  order_date  > to_date('20210101') AND last_day('20210101') > order_date then total end) jan,
+	    sum(case when  order_date  > to_date('20210201') AND last_day('20210201') > order_date then total end) feb,
+	    sum(case when  order_date  > to_date('20210301') AND last_day('20210301') > order_date then total end) mar,
+	    sum(case when  order_date  > to_date('20210401') AND last_day('20210401') > order_date then total end) apr,
+	    sum(case when  order_date  > to_date('20210501') AND last_day('20210501') > order_date then total end) may,
+	    sum(case when  order_date  > to_date('20210601') AND last_day('20210601') > order_date then total end) jun,
+	    sum(case when  order_date  > to_date('20210701') AND last_day('20210701') > order_date then total end) jul,
+	    sum(case when  order_date  > to_date('20210801') AND last_day('20210801') > order_date then total end) aug,
+	    sum(case when  order_date  > to_date('20210901') AND last_day('20210901') > order_date then total end) sep,
+	    sum(case when  order_date  > to_date('20211001') AND last_day('20211001') > order_date then total end) oct,
+	    sum(case when  order_date  > to_date('20211101') AND last_day('20211101') > order_date then total end) nob,
+	    sum(case when  order_date  > to_date('20211201') AND last_day('20211201') > order_date then total end) dec,
+	    sum(case when  order_date  > to_date('20210101') AND last_day('20211201') > order_date then total end) total
+	  FROM bm_order_list 
+	  WHERE delevery_state = '배달 완료' 
+	
+	</select>
+	
+	
+	
+</mapper>

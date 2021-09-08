@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="exam.css">
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+</head>
+<body>
+    
+    <div id="wrap">
+
+        <header id="header">
+            <div class="tab_btn">
+                <ul>
+                    <li class="active">
+                        공지사항1
+                    </li>
+                    <li>
+                        공지사항2
+                    </li>
+                    <li>
+                        공지사항3
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="tab_cont">
+                <ul>
+                    <li> 
+                        <div>공지사항 1 내용</div>
+                        <div>공지사항 1 내용</div>
+                        <div>공지사항 1 내용</div>
+                        <div>공지사항 1 내용</div>
+                    </li>
+
+                    <li>
+                        <div>공지사항 2 내용</div>
+                        <div>공지사항 2 내용</div>
+                        <div>공지사항 2 내용</div>
+                        <div>공지사항 2 내용</div>
+                    </li>
+                    <li>
+                        <div>공지사항 3 내용</div>
+                        <div>공지사항 3 내용</div>
+                        <div>공지사항 3 내용</div>
+                        <div>공지사항 3 내용</div>
+                    </li>
+
+                </ul>
+
+
+            </div>
+
+
+
+
+        </header>
+
+        <section id="banner"></section>
+        <section id="content1"></section>
+        <section id="content2"></section>
+        <footer></footer>
+    </div>
+
+    <script>
+        var tabBtn = $(".tab_btn li");
+        var tabCont = $(".tab_cont >ul > li");
+
+
+        tabCont.hide().eq(0).show();
+
+        tabBtn.click(function(){
+            var index= $(this).index();
+            // alert(index);
+            tabCont.hide();
+            tabCont.eq(index).show();
+
+            // tabBtn.removeClass("active");
+            // $(this).addClass("active");
+
+            // tabBtn.css("background", "black");
+
+
+
+        })
+
+    </script>
+</body>
+</html>

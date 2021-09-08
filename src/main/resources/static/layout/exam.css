@@ -1,0 +1,51 @@
+
+#wrap {
+    width: 50%;
+    height: 500px;
+    background: yellow;
+    margin:  0 auto;
+}
+
+
+
+.tab_btn {
+    padding: 10px;
+    background: red;
+
+}
+
+.tab_btn ul {
+    background: royalblue;
+    display: flex;
+
+}
+.tab_btn ul li  {
+    width: 300px;
+    height: 50px;
+    font-size: 20px;
+    border: 1px solid #ddd;
+    text-align: center;
+    padding-top: 20px;
+    background: white;
+    cursor: pointer;
+}
+/* .tab_btn ul li button {
+    width: 200px;
+    height: 50px;
+    font-size: 20px;
+
+} */
+
+.tab_btn ul li.active {
+    background: turquoise;
+}
+
+
+
+
+.tab_cont {
+
+    /* display: none; */
+    padding: 20px;
+    font-size: 20px;
+}
