@@ -57,7 +57,7 @@ public class StoreContorller {
     
 		List storeList =storeService.getStoreList(category,address1/100); // 우편번호가 31090 이면  310,  주소가 310이 포함된 매장 찾기 
 
-		
+		 
 		Calendar time = Calendar.getInstance();
 		
 		System.out.println(storeList);
