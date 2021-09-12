@@ -44,7 +44,7 @@ public class StoreContorller {
 	 
 	@Autowired
 	private CookieManager cookieManager;
-	// 커밋
+	// 커밋123
 	// 매장 목록
 	@GetMapping("/storeList/{category}/{address1}")
 	public String storeList(HttpServletRequest request,Model model,HttpSession session,
