@@ -72,7 +72,7 @@ public class StoreContorller {
 		
 		System.out.println("------------------- 매장 목록 -------------------");
 		return "store/storeList";
-		
+		 
 		
 	}
 	// 매장 상세
