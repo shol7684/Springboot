@@ -6,7 +6,7 @@
 
 	<!-- 매장 목록 -->
 	<select id="getStoreList" parameterType="hashMap" resultType="com.baemin.vo.StoreVO">
-		SELECT
+		<!-- SELECT
 		    s.cate,
 		    s.store_num,
 		    s.store_name,
@@ -52,7 +52,124 @@
 		AND 
 			s.store_address1 
 		LIKE '${address1 }%'
-		
+		 -->
+		 <![CDATA[
+		 
+		 SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment,
+		    nvl(round(avg(r.score),1),0) score
+		FROM
+		    storelist s
+            
+            
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+	    GROUP BY  s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+	    HAVING 
+			s.cate = ${category } 
+		AND 
+			s.store_address1 
+       
+		LIKE '${address1 }%'
+             and
+             (s.busi_hours1 < s.busi_hours2 and s.busi_hours1 <= TO_CHAR(SYSDATE, 'HH24') and  TO_CHAR(SYSDATE, 'HH24') <= s.busi_hours2)
+             or
+             (s.busi_hours1 > s.busi_hours2 and s.busi_hours1 <= TO_CHAR(SYSDATE, 'HH24') and  TO_CHAR(SYSDATE, 'HH24') <= 0)
+             
+             
+union all
+
+
+SELECT
+		    s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.delevery_tip,
+		    s.store_des,
+		    count(r.store_num) review_count,
+		    count(r.boss_comment) boss_comment,
+		    nvl(round(avg(r.score),1),0) score
+		FROM
+		    storelist s
+            
+            
+		LEFT JOIN 
+		    bm_review r
+	    ON 
+	    	s.store_num = r.store_num
+	    GROUP BY  s.cate,
+		    s.store_num,
+		    s.store_name,
+		    s.store_address1,
+		    s.store_address2,
+		    s.store_address3,
+		    s.store_phone,
+		    s.store_img,
+		    s.store_thumb,
+		    s.busi_hours1,
+		    s.busi_hours2,
+		    s.min_delevery,
+		    s.delevery_time,
+		    s.score,
+		    s.delevery_tip,
+		    s.store_des
+	    HAVING 
+			s.cate = ${category } 
+		AND 
+			s.store_address1 
+       
+		LIKE '${address1 }%'
+             and
+             (s.busi_hours1 < s.busi_hours2 and (s.busi_hours1 > TO_CHAR(SYSDATE, 'HH24') or  TO_CHAR(SYSDATE, 'HH24') > s.busi_hours2))
+
+            or
+            (s.busi_hours1 > s.busi_hours2 and (s.busi_hours1 > TO_CHAR(SYSDATE, 'HH24') or  TO_CHAR(SYSDATE, 'HH24') > 0))
+
+]]>
+		 
 	</select>
 	
 	
