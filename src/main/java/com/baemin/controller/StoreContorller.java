@@ -3,6 +3,7 @@ package com.baemin.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class StoreContorller {
 	 
 	@Autowired
 	private CookieManager cookieManager;
-	
+	// 커밋
 	// 매장 목록
 	@GetMapping("/storeList/{category}/{address1}")
 	public String storeList(HttpServletRequest request,Model model,HttpSession session,
@@ -53,11 +54,15 @@ public class StoreContorller {
 		System.out.println("------------------- 매장 목록 -------------------");
 		Map address =(Map) session.getAttribute("address"); 
 		
-
+    
 		List storeList =storeService.getStoreList(category,address1/100); // 우편번호가 31090 이면  310,  주소가 310이 포함된 매장 찾기 
 
+		
+		Calendar time = Calendar.getInstance();
+		
 		System.out.println(storeList);
 		
+		model.addAttribute("time", time.get(Calendar.HOUR_OF_DAY)); // 현재시간과 가게 오픈시간 비교 
 		model.addAttribute("address", address); 
 		model.addAttribute("storeList",storeList);
 		model.addAttribute("category",category); // 정렬을 위해서 추가
@@ -249,7 +254,7 @@ public class StoreContorller {
 		System.out.println(index);
 		System.out.println(category);
 		System.out.println(address);
-		
+		 
 		List storeList = storeService.sortStoreList(index,category,address);
 		
 		System.out.println("정렬 = " + storeList);
@@ -262,7 +267,6 @@ public class StoreContorller {
 	
 	@PostMapping("/clearCookie")
 	public String clearCookie(HttpServletResponse response,HttpServletRequest reqeust) throws UnsupportedEncodingException {
-
 		Cookie[] cookies = reqeust.getCookies();
 		
 		Cookie  cookie = new Cookie("searchWord" , null);
